@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Navigator</string>
+    <string name="tab_food">美食</string>
+    <string name="tab_car_park">停车场</string>
+    <string name="tab_gas_station">加油站</string>
+</resources>
