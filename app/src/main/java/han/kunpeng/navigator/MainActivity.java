@@ -7,14 +7,18 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.services.core.LatLonPoint;
 
 public class MainActivity extends BaseActivity implements AMap.OnMyLocationChangeListener {
     private static final String TAG = "amap";
     private MapView mMapView;
     private AMap mAMap;
     private MyLocationStyle mMyLocationStyle;
+    private LatLonPoint mMyLatLonPoint = null;
 
     private TabLayout mTabLayout;
     private TabLayout.Tab mTabFood;
@@ -131,7 +135,16 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
     public void onMyLocationChange(Location location) {
         // 定位回调监听
         if (location != null) {
-            Log.e(TAG, "onMyLocationChange 定位成功， lat: " + location.getLatitude() + " lon: " + location.getLongitude());
+            Log.i(TAG, "onMyLocationChange 定位成功， lat: " + location.getLatitude() + " lon: " + location.getLongitude());
+            // 首次定位
+            if (null == mMyLatLonPoint) {
+                mMyLatLonPoint = new LatLonPoint(location.getLatitude(), location.getLongitude());
+                // 选择移动到地图中心点并修改级别到 16 级
+                mAMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mMyLatLonPoint.getLatitude(), mMyLatLonPoint.getLongitude()), 16));
+            } else {
+                mMyLatLonPoint.setLatitude(location.getLatitude());
+                mMyLatLonPoint.setLongitude(location.getLongitude());
+            }
             Bundle bundle = location.getExtras();
             if (bundle != null) {
                 int errorCode = bundle.getInt(MyLocationStyle.ERROR_CODE);
@@ -147,7 +160,6 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
                 Log.e(TAG, "定位信息， code: " + errorCode + " errorInfo: " + errorInfo + " locationType: " + locationType);
             } else {
                 Log.e(TAG, "定位信息， bundle is null ");
-
             }
 
         } else {
