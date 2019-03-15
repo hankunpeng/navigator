@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="app_name">FuxiMap</string>
+    <string name="tab_food">美食</string>
+    <string name="tab_car_park">停车场</string>
+    <string name="tab_gas_station">加油站</string>
+    <string name="tab_toilet">厕所</string>
+    <string name="tab_repair_station">维修站</string>
+    <string name="tab_hotel">酒店</string>
+    <string name="tab_spot">景点</string>
+    <string name="tab_bus_station">公交站</string>
+    <string name="tab_bank">银行</string>
+    <string name="tab_more">更多</string>
+    <string name="button_cancel">取消</string>
+    <string name="button_settings">设置</string>
+    <string name="dialog_title_prompt">提示</string>
+    <string name="dialog_title_message">当前应用缺少必要权限。\n请点击 &quot;设置&quot; 获取所需权限。</string>
+    <string name="search_bar_hint">请输入您要找的位置</string>
+</resources>
