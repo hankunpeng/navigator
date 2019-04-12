@@ -1,6 +1,9 @@
 package han.kunpeng.navigator;
 
+import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,31 +12,55 @@ import android.widget.Toast;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.CustomMapStyleOptions;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.services.core.LatLonPoint;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MainActivity extends BaseActivity implements AMap.OnMyLocationChangeListener {
-    private static final String TAG = "amap";
     private MapView mMapView;
     private AMap mAMap;
     private MyLocationStyle mMyLocationStyle;
     private LatLonPoint mMyLatLonPoint = null;
-
+    private CustomMapStyleOptions mapStyleOptions = new CustomMapStyleOptions();
     private TabLayout mTabLayout;
-    private TabLayout.Tab mTabFood;
-    private TabLayout.Tab mTabCarPark;
-    private TabLayout.Tab mTabGasStation;
+    private Timer mTimer = new Timer();
+    private TimerTask mTimerTask = new TimerTask() {
+        @Override
+        public void run() {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+/*
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(MainActivity.this, SplashActivity.class);
+                startActivity(intent);
+            }
+        });
+*/
+
         mMapView = findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState); // 此方法必须重写
 
         init();
+
+/*
+        startActivity(new Intent(this.getApplicationContext(),
+                com.amap.api.maps.offlinemap.OfflineMapActivity.class));
+*/
     }
 
     private void init() {
@@ -42,25 +69,13 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
             setUpMap();
         }
 
+//        setMapCustomStyleFile(this);
+
         mTabLayout = findViewById(R.id.tab_layout);
-        mTabFood = mTabLayout.newTab().setText(R.string.tab_food);
-        mTabCarPark = mTabLayout.newTab().setText(R.string.tab_car_park);
-        mTabGasStation = mTabLayout.newTab().setText(R.string.tab_gas_station);
-        mTabLayout.addTab(mTabFood);
-        mTabLayout.addTab(mTabCarPark);
-        mTabLayout.addTab(mTabGasStation);
         mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                if (mTabFood == tab) {
-                    Toast.makeText(getApplicationContext(), R.string.tab_food, Toast.LENGTH_SHORT).show();
-                }
-                if (mTabCarPark == tab) {
-                    Toast.makeText(getApplicationContext(), R.string.tab_car_park, Toast.LENGTH_SHORT).show();
-                }
-                if (mTabGasStation == tab) {
-                    Toast.makeText(getApplicationContext(), R.string.tab_gas_station, Toast.LENGTH_SHORT).show();
-                }
+
             }
 
             @Override
@@ -73,6 +88,9 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
 
             }
         });
+        for (String tab : getResources().getStringArray(R.array.tabs)) {
+            mTabLayout.addTab(mTabLayout.newTab().setText(tab));
+        }
 
     }
 
@@ -93,6 +111,42 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
 
         // 设置 SDK 自带定位消息监听
         mAMap.setOnMyLocationChangeListener(this);
+
+
+        mAMap.setOnMapLoadedListener(new AMap.OnMapLoadedListener() {
+            @Override
+            public void onMapLoaded() {
+                Log.i(TAG, "onMapLoaded - zoom level: " + mAMap.getCameraPosition().zoom);
+            }
+        });
+    }
+
+    private void setMapCustomStyleFile(Context context) {
+        String styleName = "style_new.data";
+        InputStream inputStream = null;
+        try {
+            inputStream = context.getAssets().open(styleName);
+            byte[] b = new byte[inputStream.available()];
+            inputStream.read(b);
+
+            if (mapStyleOptions != null) {
+                // 设置自定义样式
+                mapStyleOptions.setStyleData(b);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     /**
@@ -101,7 +155,11 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i(TAG, "MainActivity -onResume");
         mMapView.onResume();
+//        Log.i(TAG, "MainActivity -onResume - Timer.schedule - begin");
+//        mTimer.schedule(mTimerTask, 3000, 3000);
+//        Log.i(TAG, "MainActivity -onResume - Timer.schedule - end");
     }
 
     /**
@@ -129,13 +187,15 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
     protected void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
+        mTimer.cancel();
     }
 
     @Override
     public void onMyLocationChange(Location location) {
         // 定位回调监听
         if (location != null) {
-            Log.i(TAG, "onMyLocationChange 定位成功， lat: " + location.getLatitude() + " lon: " + location.getLongitude());
+            Log.i(TAG, "onMyLocationChange - Latitude: " + location.getLatitude() + ", Longitude: " + location.getLongitude());
+/*
             // 首次定位
             if (null == mMyLatLonPoint) {
                 mMyLatLonPoint = new LatLonPoint(location.getLatitude(), location.getLongitude());
@@ -152,15 +212,18 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
                 // 定位类型，可能为 GPS、WIFI 等，具体可以参考官网的定位 SDK 介绍。
                 int locationType = bundle.getInt(MyLocationStyle.LOCATION_TYPE);
 
-                /*
+                */
+/*
                 errorCode
                 errorInfo
                 locationType
-                */
+                *//*
+
                 Log.e(TAG, "定位信息， code: " + errorCode + " errorInfo: " + errorInfo + " locationType: " + locationType);
             } else {
                 Log.e(TAG, "定位信息， bundle is null ");
             }
+*/
 
         } else {
             Log.e(TAG, "定位失败");

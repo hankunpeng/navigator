@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="app_name">FuxiMap</string>
+    <string name="app_name">领航员</string>
     <string name="tab_food">美食</string>
     <string name="tab_car_park">停车场</string>
     <string name="tab_gas_station">加油站</string>

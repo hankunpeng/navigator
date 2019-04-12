@@ -10,13 +10,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.FragmentActivity;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends FragmentActivity {
+    public static final String TAG = "HHHH";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

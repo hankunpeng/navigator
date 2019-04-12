@@ -7,17 +7,22 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tab_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:tabBackground="@android:color/background_dark"
-        app:tabSelectedTextColor="@android:color/holo_orange_dark"
-        app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget" />
-
     <com.amap.api.maps.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:visibility="gone"
+        app:tabBackground="@android:color/background_dark"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@android:color/holo_orange_dark"
+        app:tabIndicatorHeight="3dp"
+        app:tabPadding="16dp"
+        app:tabRippleColor="@android:color/holo_orange_dark"
+        app:tabSelectedTextColor="@android:color/holo_orange_dark"
+        app:tabTextAppearance="@style/TextAppearance.Tab" />
 </LinearLayout>
