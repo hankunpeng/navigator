@@ -1,19 +1,13 @@
 package han.kunpeng.navigator;
 
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
-import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.amap.api.maps.AMap;
-import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.CustomMapStyleOptions;
-import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.services.core.LatLonPoint;
 
@@ -21,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import han.kunpeng.navigator.util.Trace;
 
 public class MainActivity extends BaseActivity implements AMap.OnMyLocationChangeListener {
     private MapView mMapView;
@@ -61,6 +57,8 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
         startActivity(new Intent(this.getApplicationContext(),
                 com.amap.api.maps.offlinemap.OfflineMapActivity.class));
 */
+
+
     }
 
     private void init() {
@@ -116,7 +114,7 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
         mAMap.setOnMapLoadedListener(new AMap.OnMapLoadedListener() {
             @Override
             public void onMapLoaded() {
-                Log.i(TAG, "onMapLoaded - zoom level: " + mAMap.getCameraPosition().zoom);
+                Trace.i("onMapLoaded - zoom level: " + mAMap.getCameraPosition().zoom);
             }
         });
     }
@@ -155,7 +153,7 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(TAG, "MainActivity -onResume");
+        Trace.i("onResume - d");
         mMapView.onResume();
 //        Log.i(TAG, "MainActivity -onResume - Timer.schedule - begin");
 //        mTimer.schedule(mTimerTask, 3000, 3000);
@@ -194,7 +192,7 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
     public void onMyLocationChange(Location location) {
         // 定位回调监听
         if (location != null) {
-            Log.i(TAG, "onMyLocationChange - Latitude: " + location.getLatitude() + ", Longitude: " + location.getLongitude());
+            Trace.i("onMyLocationChange - Latitude: " + location.getLatitude() + ", Longitude: " + location.getLongitude());
 /*
             // 首次定位
             if (null == mMyLatLonPoint) {
@@ -226,7 +224,7 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
 */
 
         } else {
-            Log.e(TAG, "定位失败");
+            Trace.e("定位失败");
         }
     }
 }
