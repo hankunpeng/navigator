@@ -203,11 +203,12 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
     @Override
     protected void onResume() {
         super.onResume();
-        Trace.i("onResume - d");
+        Trace.d("onResume - begin");
         mMapView.onResume();
 //        Log.i(TAG, "MainActivity -onResume - Timer.schedule - begin");
 //        mTimer.schedule(mTimerTask, 3000, 3000);
 //        Log.i(TAG, "MainActivity -onResume - Timer.schedule - end");
+        Trace.d("onResume - end");
     }
 
     /**
@@ -252,7 +253,7 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
                     mMyLatLonPoint = new LatLonPoint(latitude, longitude);
                     northCamera(latitude, longitude);
 
-                    // 通过网络获取所在城市
+                    // TODO 通过网络获取所在城市
                     // getCityAsyn();
 
                     // 首次定位成功时初始化界面
@@ -292,14 +293,14 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
            bearing 方向角度。正北向顺时针方向计算，从 0 度到 360 度。
         */
         CameraPosition currentCameraPosition = mAMap.getCameraPosition();
-        Trace.d("faceNorth - currentCameraPosition: " + currentCameraPosition.toString());
+        Trace.d("northCamera - currentCameraPosition: " + currentCameraPosition.toString());
         CameraPosition newCameraPosition = currentCameraPosition.builder(currentCameraPosition)
                 .target(new LatLng(latitude, longitude))
                 .zoom(MAP_DEFAULT_ZOOM)
                 .tilt(MAP_DEFAULT_TILT)
                 .bearing(MAP_DEFAULT_BEARING)
                 .build();
-        Trace.i("faceNorth - newCameraPosition: " + newCameraPosition.toString());
+        Trace.i("northCamera - newCameraPosition: " + newCameraPosition.toString());
         mAMap.animateCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition));
     }
 
