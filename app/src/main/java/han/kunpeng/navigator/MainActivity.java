@@ -1,15 +1,24 @@
 package han.kunpeng.navigator;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Location;
 import android.support.design.widget.TabLayout;
 import android.os.Bundle;
+import android.view.View;
 
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.UiSettings;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.CustomMapStyleOptions;
+import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.maps.model.MyTrafficStyle;
 import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.geocoder.GeocodeSearch;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,13 +27,20 @@ import java.util.TimerTask;
 
 import han.kunpeng.navigator.util.Trace;
 
+import static han.kunpeng.navigator.util.Constants.MAP_DEFAULT_BEARING;
+import static han.kunpeng.navigator.util.Constants.MAP_DEFAULT_TILT;
+import static han.kunpeng.navigator.util.Constants.MAP_DEFAULT_ZOOM;
+
 public class MainActivity extends BaseActivity implements AMap.OnMyLocationChangeListener {
     private MapView mMapView;
     private AMap mAMap;
+    private UiSettings mUiSettings;
     private MyLocationStyle mMyLocationStyle;
     private LatLonPoint mMyLatLonPoint = null;
     private CustomMapStyleOptions mapStyleOptions = new CustomMapStyleOptions();
     private TabLayout mTabLayout;
+
+/*
     private Timer mTimer = new Timer();
     private TimerTask mTimerTask = new TimerTask() {
         @Override
@@ -32,12 +48,14 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
 
         }
     };
+*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Trace.d("onCreate - begin");
+        getWindow().getAttributes().setTitle(BuildConfig.APPLICATION_ID);
 /*
         new Handler().post(new Runnable() {
             @Override
@@ -58,65 +76,97 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
                 com.amap.api.maps.offlinemap.OfflineMapActivity.class));
 */
 
-
+        Trace.d("onCreate - end");
     }
 
     private void init() {
-        if (mAMap == null) {
-            mAMap = mMapView.getMap();
-            setUpMap();
-        }
-
-//        setMapCustomStyleFile(this);
-
-        mTabLayout = findViewById(R.id.tab_layout);
-        mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-        for (String tab : getResources().getStringArray(R.array.tabs)) {
-            mTabLayout.addTab(mTabLayout.newTab().setText(tab));
-        }
-
+        initAMap();
     }
 
+    private void initAMap() {
+        if (mAMap == null) {
+            mAMap = mMapView.getMap();
+
+            mAMap.setOnMapLoadedListener(new AMap.OnMapLoadedListener() {
+                @Override
+                public void onMapLoaded() {
+                    setUpMap();
+                }
+            });
+        } else {
+            Trace.d("AMap != null");
+        }
+    }
     /**
      * 设置一些 AMap 的属性
      */
     private void setUpMap() {
-        // 设置默认定位状态
-        mMyLocationStyle = new MyLocationStyle().myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE);
+        // 默认定位样式是 MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE
+        // 定位频率为 1 秒 1 次，且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。
+        mMyLocationStyle = new MyLocationStyle();
+
+        // 连续定位，蓝点不会移动到地图中心点，地图依照设备方向旋转，并且蓝点会跟随设备移动。
+        mMyLocationStyle = mMyLocationStyle.myLocationType(
+                MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER);
+
+        // TODO 做一个位置图标
+        // mMyLocationStyle.myLocationIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker_location));
+
+        // 设置定位蓝点的样式
         mAMap.setMyLocationStyle(mMyLocationStyle);
 
-        // 设置默认定位按钮是否显示
-        mAMap.getUiSettings().setMyLocationButtonEnabled(true);
-
-        // 默认为 false 表示隐藏定位层并不可触发定位
-        // 设置为 true 表示显示定位层并可触发定位
+        // 设置为 true 表示启动显示定位蓝点
+        // 设置为 false 表示隐藏定位蓝点并不进行定位
         mAMap.setMyLocationEnabled(true);
 
-        // 设置 SDK 自带定位消息监听
+        // 实现 AMap.OnMyLocationChangeListener 监听器
+        // 通过 onMyLocationChange(android.location.Location location) 回调方法获取经纬度信息
         mAMap.setOnMyLocationChangeListener(this);
 
+        // 控制是否显示定位蓝点
+        mMyLocationStyle.showMyLocation(true);
 
-        mAMap.setOnMapLoadedListener(new AMap.OnMapLoadedListener() {
-            @Override
-            public void onMapLoaded() {
-                Trace.i("onMapLoaded - zoom level: " + mAMap.getCameraPosition().zoom);
-            }
-        });
+        /* 设置最小缩放级别
+         * 在 SDK 地图 zoom 级别 3 和 4（世界地图级别）显示中国以外地区时，
+         * 由于没有详细地图数据，显示效果看起来和地图加载失败时一样的黄白色底图，
+         * 因此我们把最小缩放级别设置为 5 。
+         */
+        mAMap.setMinZoomLevel(5);
+
+        // TODO 构造 GeocodeSearch 对象并设置监听
+        // mGeocoderSearch = new GeocodeSearch(this);
+        // mGeocoderSearch.setOnGeocodeSearchListener(this);
+
+        mUiSettings = mAMap.getUiSettings();
+
+        // 不显示高德自带缩放按钮
+        mUiSettings.setZoomControlsEnabled(false);
+
+        // 不显示高德自带定位按钮
+        mUiSettings.setMyLocationButtonEnabled(false);
+
+        // 把高德 Logo 挪到屏幕显示区域外
+        mUiSettings.setLogoBottomMargin(-666);
+
+        // 设置地图可以手势滑动
+        mUiSettings.setScrollGesturesEnabled(true);
+
+        // 设置地图可以手势缩放
+        mUiSettings.setZoomGesturesEnabled(true);
+
+        // 设置地图可以倾斜
+        mUiSettings.setTiltGesturesEnabled(true);
+
+        // 设置地图可以旋转
+        mUiSettings.setRotateGesturesEnabled(true);
+
+        // 自定义实时交通信息的颜色样式
+        MyTrafficStyle myTrafficStyle = new MyTrafficStyle();
+        myTrafficStyle.setSeriousCongestedColor(0xff92000a);
+        myTrafficStyle.setCongestedColor(0xffea0312);
+        myTrafficStyle.setSlowColor(0xffff7508);
+        myTrafficStyle.setSmoothColor(0xff00a209);
+        mAMap.setMyTrafficStyle(myTrafficStyle);
     }
 
     private void setMapCustomStyleFile(Context context) {
@@ -185,46 +235,105 @@ public class MainActivity extends BaseActivity implements AMap.OnMyLocationChang
     protected void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
-        mTimer.cancel();
+//        mTimer.cancel();
     }
 
     @Override
     public void onMyLocationChange(Location location) {
-        // 定位回调监听
-        if (location != null) {
-            Trace.i("onMyLocationChange - Latitude: " + location.getLatitude() + ", Longitude: " + location.getLongitude());
-/*
-            // 首次定位
-            if (null == mMyLatLonPoint) {
-                mMyLatLonPoint = new LatLonPoint(location.getLatitude(), location.getLongitude());
-                // 选择移动到地图中心点并修改级别到 16 级
-                mAMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mMyLatLonPoint.getLatitude(), mMyLatLonPoint.getLongitude()), 16));
-            } else {
-                mMyLatLonPoint.setLatitude(location.getLatitude());
-                mMyLatLonPoint.setLongitude(location.getLongitude());
-            }
-            Bundle bundle = location.getExtras();
-            if (bundle != null) {
-                int errorCode = bundle.getInt(MyLocationStyle.ERROR_CODE);
-                String errorInfo = bundle.getString(MyLocationStyle.ERROR_INFO);
-                // 定位类型，可能为 GPS、WIFI 等，具体可以参考官网的定位 SDK 介绍。
-                int locationType = bundle.getInt(MyLocationStyle.LOCATION_TYPE);
-
-                */
-/*
-                errorCode
-                errorInfo
-                locationType
-                *//*
-
-                Log.e(TAG, "定位信息， code: " + errorCode + " errorInfo: " + errorInfo + " locationType: " + locationType);
-            } else {
-                Log.e(TAG, "定位信息， bundle is null ");
-            }
-*/
-
+        if (null == location) {
+            Trace.e("onMyLocationChange - location is null");
         } else {
-            Trace.e("定位失败");
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+            if (isValidPoint(latitude, longitude)) {
+//                Trace.d("onMyLocationChange - latitude: " + latitude + ", longitude: " + longitude);
+                if (null == mMyLatLonPoint) {
+                    Trace.i("onMyLocationChange - valid location - first");
+                    mMyLatLonPoint = new LatLonPoint(latitude, longitude);
+                    northCamera(latitude, longitude);
+
+                    // 通过网络获取所在城市
+                    // getCityAsyn();
+
+                    // 首次定位成功时初始化界面
+                    initViews();
+                } else {
+                    mMyLatLonPoint.setLatitude(location.getLatitude());
+                    mMyLatLonPoint.setLongitude(location.getLongitude());
+                }
+            } else {
+                Trace.e("onMyLocationChange - location is invalid");
+            }
         }
+    }
+
+    public boolean isValidPoint(LatLng point) {
+        if (0 == Double.compare(0, point.latitude) && 0 == Double.compare(0, point.longitude)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public boolean isValidPoint(double latitude, double longitude) {
+        if (0 == Double.compare(0, latitude) && 0 == Double.compare(0, longitude)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    // 把当前经纬度点移动到屏幕中心并指北
+    private void northCamera(double latitude, double longitude) {
+        /* CameraPosition(LatLng target, float zoom, float tilt, float bearing) 四个参数的含义
+           target 经纬度
+           zoom 缩放级别
+           tilt 倾斜角度
+           bearing 方向角度。正北向顺时针方向计算，从 0 度到 360 度。
+        */
+        CameraPosition currentCameraPosition = mAMap.getCameraPosition();
+        Trace.d("faceNorth - currentCameraPosition: " + currentCameraPosition.toString());
+        CameraPosition newCameraPosition = currentCameraPosition.builder(currentCameraPosition)
+                .target(new LatLng(latitude, longitude))
+                .zoom(MAP_DEFAULT_ZOOM)
+                .tilt(MAP_DEFAULT_TILT)
+                .bearing(MAP_DEFAULT_BEARING)
+                .build();
+        Trace.i("faceNorth - newCameraPosition: " + newCameraPosition.toString());
+        mAMap.animateCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition));
+    }
+
+    private void initViews() {
+        initTabs();
+    }
+
+    private void initTabs() {
+        mTabLayout = findViewById(R.id.tab_layout);
+        mTabLayout.setVisibility(View.VISIBLE);
+        mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                // TODO doTabSearchQuery(tab.getText().toString());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+        String[] tabs = getResources().getStringArray(R.array.tabs);
+        for (int i = 0; i < tabs.length; i++) {
+            String tab = tabs[i];
+            Trace.d("initTabs - tab: " + tab);
+            mTabLayout.addTab(mTabLayout.newTab().setText(tab));
+        }
+
+        mTabLayout.setScrollPosition(0, 0, true);
     }
 }

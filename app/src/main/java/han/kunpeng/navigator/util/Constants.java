@@ -30,4 +30,11 @@ public class Constants {
 	public static final LatLng CHENGDU = new LatLng(30.679879, 104.064855);// 成都市经纬度
 	public static final LatLng XIAN = new LatLng(34.341568, 108.940174);// 西安市经纬度
 	public static final LatLng ZHENGZHOU = new LatLng(34.7466, 113.625367);// 郑州市经纬度
+
+	public static final String MAP_CITY_BEIJING = "北京市";
+	public static final String MAP_CITY_SHANGHAI = "上海市";
+	public static final float MAP_DEFAULT_TILT = 60;
+	public static final float MAP_DEFAULT_ZOOM = 16;
+	public static final float MAP_DEFAULT_BEARING = 0;
+	public static final int MAP_DEFAULT_BOUND = 20000;
 }

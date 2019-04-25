@@ -14,5 +14,4 @@ public class NavigatorApp extends Application {
             Trace.plant(new Trace.ReleaseTree());
         }
     }
-
 }
