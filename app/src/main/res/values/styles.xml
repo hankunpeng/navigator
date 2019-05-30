@@ -3,7 +3,8 @@
     <!--尝试将导航 Manifest 中，导航 View 所在的 activity 的 android:theme 修改为：-->
     <!--android:theme="@android:style/Theme.Light.NoTitleBar"-->
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="QMUI.Compat.NoActionBar">
+    <!--<style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">-->
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>

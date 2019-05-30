@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,22 +7,57 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tab_layout"
-        android:layout_width="match_parent"
-        android:layout_height="90dp"
-        android:visibility="gone"
-        app:tabBackground="@android:color/background_dark"
-        app:tabGravity="fill"
-        app:tabIndicatorColor="@android:color/holo_orange_dark"
-        app:tabIndicatorHeight="4dp"
-        app:tabPadding="16dp"
-        app:tabRippleColor="@android:color/holo_orange_dark"
-        app:tabSelectedTextColor="@android:color/holo_orange_dark"
-        app:tabTextAppearance="@style/TextAppearance.Tab" />
-
     <com.amap.api.maps.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-</LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:visibility="gone"
+            app:tabBackground="@android:color/background_dark"
+            app:tabGravity="fill"
+            app:tabIndicatorColor="@android:color/holo_orange_dark"
+            app:tabIndicatorHeight="4dp"
+            app:tabPadding="16dp"
+            app:tabRippleColor="@android:color/holo_orange_dark"
+            app:tabSelectedTextColor="@android:color/holo_orange_dark"
+            app:tabTextAppearance="@style/TextAppearance.Tab" />
+
+        <Button
+            android:visibility="gone"
+            android:layout_centerInParent="true"
+            android:background="@android:color/holo_blue_dark"
+            android:id="@+id/button_showDefaultDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickShowDefaultDialog"
+            android:text="showDefaultDialog"/>
+
+        <Button
+            android:visibility="gone"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/button_showDefaultDialog"
+            android:id="@+id/button_showQMUIDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickShowQMUIDialog"
+            android:text="showQMUIDialog"/>
+
+        <Button
+            android:visibility="gone"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/button_showQMUIDialog"
+            android:id="@+id/button_aidl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickAidl"
+            android:text="AIDL"/>
+    </RelativeLayout>
+
+</FrameLayout>
