@@ -25,10 +25,9 @@
             app:tabIndicatorColor="@android:color/holo_orange_dark"
             app:tabIndicatorHeight="4dp"
             app:tabPadding="16dp"
-            app:tabRippleColor="@android:color/holo_orange_dark"
             app:tabSelectedTextColor="@android:color/holo_orange_dark"
             app:tabTextAppearance="@style/TextAppearance.Tab" />
-
+            <!--app:tabRippleColor="@android:color/holo_orange_dark"-->
         <Button
             android:visibility="gone"
             android:layout_centerInParent="true"

@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.amap.api.services.core.PoiItem;
+import com.amap.api.navi.services.search.model.PoiItem;
 
 import java.util.ArrayList;
 import java.util.List;
